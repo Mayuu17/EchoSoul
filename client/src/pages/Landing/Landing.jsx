@@ -1,10 +1,16 @@
+import Navbar from "../../components/layout/Navbar";
+import HeroSection from "../../components/landing/HeroSection";
+import FeaturesSection from "../../components/landing/FeaturesSection";
+import HowItWorksSection from "../../components/landing/HowItWorksSection";
+
 function Landing() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950">
-      <h1 className="text-5xl font-bold text-cyan-400">
-        Welcome to EchoSoul 💙
-      </h1>
-    </div>
+    <>
+      <Navbar />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+    </>
   );
 }
 
