@@ -1,50 +1,128 @@
 function FeaturesSection() {
   return (
-    <section className="bg-slate-900 text-white py-20 px-6">
+    <section
+      id="features"
+      className="bg-slate-900 text-white py-20 px-6"
+    >
       <div className="max-w-6xl mx-auto">
 
-        <h2 className="text-4xl font-bold text-center">
-          Why EchoSoul?
-        </h2>
+        {/* ==========================================
+            Section Heading
+        ========================================== */}
 
-        <p className="text-center text-gray-400 mt-4">
-          Designed to preserve memories with empathy and AI.
-        </p>
+        <div className="text-center">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Why EchoSoul?
+          </h2>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-14">
+          <p className="text-center text-gray-400 mt-4 text-lg">
+            Designed to preserve memories with empathy and AI.
+          </p>
+        </div>
 
-          <div className="bg-slate-800 rounded-xl p-6">
+        {/* ==========================================
+            Feature Cards
+        ========================================== */}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
+
+          {/* ==========================================
+              AI Persona
+          ========================================== */}
+
+          <div
+            className="
+              bg-slate-800
+              rounded-2xl
+              p-7
+              border
+              border-slate-700
+              hover:border-cyan-400/50
+              hover:-translate-y-2
+              transition
+              duration-300
+              shadow-lg
+            "
+          >
+            <div className="text-5xl mb-5">
+              💙
+            </div>
+
             <h3 className="text-xl font-semibold text-cyan-400">
-              💙 AI Persona
+              AI Persona
             </h3>
 
-            <p className="text-gray-400 mt-3">
-              Build an AI companion inspired by your loved one's personality.
+            <p className="text-gray-400 mt-3 leading-7">
+              Build a personalized AI companion inspired by your loved
+              one's personality, memories and speaking style.
             </p>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-6">
+          {/* ==========================================
+              Voice Technology
+          ========================================== */}
+
+          <div
+            className="
+              bg-slate-800
+              rounded-2xl
+              p-7
+              border
+              border-slate-700
+              hover:border-cyan-400/50
+              hover:-translate-y-2
+              transition
+              duration-300
+              shadow-lg
+            "
+          >
+            <div className="text-5xl mb-5">
+              🎤
+            </div>
+
             <h3 className="text-xl font-semibold text-cyan-400">
-              🎤 Voice Clone
+              Voice Technology
             </h3>
 
-            <p className="text-gray-400 mt-3">
-              Hear responses in a familiar voice using AI voice technology.
+            <p className="text-gray-400 mt-3 leading-7">
+              Experience natural AI-generated responses with expressive
+              voice technology for a more personal interaction.
             </p>
           </div>
 
-          <div className="bg-slate-800 rounded-xl p-6">
+          {/* ==========================================
+              Private Memories
+          ========================================== */}
+
+          <div
+            className="
+              bg-slate-800
+              rounded-2xl
+              p-7
+              border
+              border-slate-700
+              hover:border-cyan-400/50
+              hover:-translate-y-2
+              transition
+              duration-300
+              shadow-lg
+            "
+          >
+            <div className="text-5xl mb-5">
+              🔒
+            </div>
+
             <h3 className="text-xl font-semibold text-cyan-400">
-              🔒 Private & Secure
+              Private Memories
             </h3>
 
-            <p className="text-gray-400 mt-3">
-              Your chats, memories, and profile stay protected and encrypted.
+            <p className="text-gray-400 mt-3 leading-7">
+              Keep your conversations and meaningful memories connected
+              to your personal EchoSoul experience.
             </p>
           </div>
 
         </div>
-
       </div>
     </section>
   );

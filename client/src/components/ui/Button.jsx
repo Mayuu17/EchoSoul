@@ -1,16 +1,16 @@
 function Button({
   children,
-  type = "button",
   variant = "primary",
+  type = "button",
   onClick,
+  disabled = false,
 }) {
   const baseStyle =
-    "px-6 py-3 rounded-lg font-semibold transition duration-300";
+    "px-8 py-3 rounded-xl font-semibold transition duration-300 cursor-pointer";
 
   const variants = {
     primary:
-      "bg-cyan-500 hover:bg-cyan-600 text-white",
-
+      "bg-cyan-400 text-slate-950 hover:bg-cyan-300",
     secondary:
       "border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-slate-950",
   };
@@ -19,6 +19,7 @@ function Button({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`${baseStyle} ${variants[variant]}`}
     >
       {children}
