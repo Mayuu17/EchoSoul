@@ -42,8 +42,8 @@ function MemoryManager() {
       console.log("🧠 Loading memories...");
 
       const response = await fetch(
-        "http://localhost:5000/api/memory",
-        {
+  "https://echosoul-q61j.onrender.com/api/memory",
+  {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

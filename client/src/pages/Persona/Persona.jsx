@@ -35,8 +35,8 @@ function Persona() {
         setError("");
 
         const response = await fetch(
-          "http://localhost:5000/api/persona",
-          {
+  "https://echosoul-q61j.onrender.com/api/persona",
+  {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,

@@ -51,9 +51,7 @@ function Signup() {
     try {
       console.log("Sending signup request...");
 
-      const response = await fetch(
-        "http://localhost:5000/api/auth/signup",
-        {
+      const response = await fetch("https://echosoul-q61j.onrender.com/api/auth/signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
