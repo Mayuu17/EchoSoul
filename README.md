@@ -1,5 +1,12 @@
 # 🌙 EchoSoul — Keeping Memories Alive Through AI
 
+## 🌐 Deployment Links
+
+* 🚀 **Live App (Frontend):** [https://echosoul-frontend.onrender.com](https://echosoul-frontend.onrender.com)
+* ⚡ **Backend API Service:** [https://echosoul-q61j.onrender.com](https://echosoul-q61j.onrender.com)
+
+---
+
 > **An AI-powered personalized companion designed to keep memories alive through meaningful conversations.**
 
 EchoSoul is a full-stack AI companion project that allows users to create a personalized conversational experience inspired by the **personality, memories, and experiences of a loved one**.
