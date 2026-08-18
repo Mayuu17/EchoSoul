@@ -88,9 +88,7 @@ function Chat() {
       try {
         console.log("📚 Loading chat history...");
 
-        const response = await fetch(
-          "http://localhost:5000/api/chat/history",
-          {
+        const response = await fetch("https://echosoul-q61j.onrender.com/api/chat/history", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -459,10 +457,7 @@ function Chat() {
         audioFile
       );
 
-      const response =
-        await fetch(
-          "http://localhost:5000/api/chat/voice",
-          {
+      const response = await fetch("https://echosoul-q61j.onrender.com/api/chat/voice", {
             method: "POST",
 
             headers: {
@@ -857,10 +852,7 @@ function Chat() {
           cleanMessage
         );
 
-        const response =
-          await fetch(
-            "http://localhost:5000/api/chat",
-            {
+        const response = await fetch("https://echosoul-q61j.onrender.com/api/chat", {
               method: "POST",
 
               headers: {
