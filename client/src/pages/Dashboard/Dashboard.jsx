@@ -169,13 +169,13 @@ function Dashboard() {
 
     try {
       const requestBody = {
-        name: form.name.trim(),
+        name: formData.name.trim(),
 
         relationship:
-          form.relationship.trim(),
+          formData.relationship.trim(),
 
         personality:
-          form.personality.trim(),
+          formData.personality.trim(),
 
         memories: formData.memories
           .split(",")
@@ -183,9 +183,9 @@ function Dashboard() {
           .filter(Boolean),
 
         speakingStyle:
-          form.speakingStyle.trim(),
+          formData.speakingStyle.trim(),
 
-        language: form.language,
+        language: formData.language,
       };
 
       const response = await fetch(
@@ -515,7 +515,14 @@ function Dashboard() {
 
   function PersonaForm({ editMode = false }) {
     return (
-      <form onSubmit={savePersona} className="mt-8 space-y-6">
+      <form
+        onSubmit={
+          editMode
+            ? handleUpdatePersona
+            : handleCreatePersona
+        }
+        className="mt-8 space-y-6"
+      >
         {/* Name */}
 
         <div>
