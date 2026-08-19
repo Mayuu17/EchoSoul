@@ -128,16 +128,13 @@ function Persona() {
   // ==========================================
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setMessage("");
-    setError("");
-  };
+  setForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   // ==========================================
   // SAVE PERSONA
@@ -202,8 +199,8 @@ function Persona() {
         : "POST";
 
       const response = await fetch(
-        "http://localhost:5000/api/persona",
-        {
+  "https://echosoul-q61j.onrender.com/api/persona",
+  {
           method,
 
           headers: {
@@ -315,10 +312,9 @@ function Persona() {
         "🎤 Uploading voice..."
       );
 
-      const response =
-        await fetch(
-          "http://localhost:5000/api/persona/voice",
-          {
+      const response = await fetch(
+  "https://echosoul-q61j.onrender.com/api/persona/voice",
+  {
             method: "POST",
 
             headers: {
