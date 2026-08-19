@@ -68,8 +68,8 @@ function Dashboard() {
         console.log("📚 Loading persona...");
 
         const response = await fetch(
-          "http://localhost:5000/api/persona",
-          {
+  "https://echosoul-q61j.onrender.com/api/persona",
+  {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -189,8 +189,8 @@ function Dashboard() {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/persona",
-        {
+  "https://echosoul-q61j.onrender.com/api/persona",
+  {
           method: "POST",
 
           headers: {
@@ -307,8 +307,8 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/persona",
-        {
+  "https://echosoul-q61j.onrender.com/api/persona",
+  {
           method: "PUT",
 
           headers: {
@@ -441,8 +441,8 @@ function Dashboard() {
       console.log("Type:", voiceFile.type);
 
       const response = await fetch(
-        "http://localhost:5000/api/persona/voice",
-        {
+  "https://echosoul-q61j.onrender.com/api/persona/voice",
+  {
           method: "POST",
 
           headers: {
