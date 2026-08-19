@@ -515,14 +515,7 @@ function Dashboard() {
 
   function PersonaForm({ editMode = false }) {
     return (
-      <form
-        onSubmit={
-          editMode
-            ? handleUpdatePersona
-            : handleCreatePersona
-        }
-        className="mt-8 space-y-6"
-      >
+      <form onSubmit={savePersona} className="mt-8 space-y-6">
         {/* Name */}
 
         <div>
