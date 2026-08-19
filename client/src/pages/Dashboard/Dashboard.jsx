@@ -1199,7 +1199,24 @@ function Dashboard() {
             </div>
 
             <div className="max-w-2xl mx-auto">
-              <PersonaForm />
+              <PersonaForm
+  editMode={isEditing}
+  formData={formData}
+  handleChange={handleChange}
+  handleCreatePersona={handleCreatePersona}
+  handleUpdatePersona={handleUpdatePersona}
+  loading={loading}
+  cancelEditing={cancelEditing}
+  persona={persona}
+  voiceFile={voiceFile}
+  handleVoiceChange={handleVoiceChange}
+  handleVoiceUpload={handleVoiceUpload}
+  voiceUploading={voiceUploading}
+  voiceMessage={voiceMessage}
+  setVoiceFile={setVoiceFile}
+  setVoiceMessage={setVoiceMessage}
+  message={message}
+/>
             </div>
           </section>
         )}
@@ -1250,3 +1267,32 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+function PersonaForm({
+  editMode = false,
+  formData,
+  handleChange,
+  handleCreatePersona,
+  handleUpdatePersona,
+  loading,
+  cancelEditing,
+  persona,
+  voiceFile,
+  handleVoiceChange,
+  handleVoiceUpload,
+  voiceUploading,
+  voiceMessage,
+  setVoiceFile,
+  setVoiceMessage,
+  message,
+}) {
+  return (
+    <form
+      id={editMode ? "edit-persona-form" : "create-persona-form"}
+      onSubmit={editMode ? handleUpdatePersona : handleCreatePersona}
+      className="mt-8 space-y-6"
+    >
+      {/* Inputs aur Buttons ka code yahan aayega */}
+    </form>
+  );
+}
