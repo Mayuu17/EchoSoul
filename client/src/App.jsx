@@ -9,29 +9,55 @@ import MemoryManager from "./pages/Memory/MemoryManager";
 
 function App() {
   return (
-    <Routes>
-      {/* Handle Render SPA Redirect Issue */}
-      <Route path="/index.html" element={<Navigate to="/" replace />} />
+    <div className="w-full max-w-full overflow-x-hidden">
+      <Routes>
+        {/* Handle Render SPA Redirect Issue */}
+        <Route
+          path="/index.html"
+          element={<Navigate to="/" replace />}
+        />
 
-      <Route path="/" element={<Landing />} />
+        {/* Landing */}
+        <Route
+          path="/"
+          element={<Landing />}
+        />
 
-      <Route path="/signup" element={<Signup />} />
+        {/* Authentication */}
+        <Route
+          path="/signup"
+          element={<Signup />}
+        />
 
-      <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-      <Route path="/dashboard" element={<Dashboard />} />
+        {/* Application */}
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
 
-      <Route path="/chat" element={<Chat />} />
+        <Route
+          path="/chat"
+          element={<Chat />}
+        />
 
-      {/* Memory Manager */}
-      <Route
-        path="/memory"
-        element={<MemoryManager />}
-      />
+        {/* Memory Manager */}
+        <Route
+          path="/memory"
+          element={<MemoryManager />}
+        />
 
-      {/* Wildcard Fallback for any other unknown path */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Unknown Route */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+      </Routes>
+    </div>
   );
 }
 
