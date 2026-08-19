@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import Container from "../ui/Container";
 
 function HeroSection() {
+  const navigate = useNavigate();
+
   // ==========================================
   // Get Started
   // ==========================================
@@ -10,9 +13,9 @@ function HeroSection() {
     const token = localStorage.getItem("token");
 
     if (token) {
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } else {
-      window.location.href = "/login";
+      navigate("/login");
     }
   };
 
