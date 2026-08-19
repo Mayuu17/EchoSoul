@@ -69,47 +69,45 @@ function Dashboard() {
   // GET PERSONA
   // ==========================================
 
-  useEffect(() => {
-    if (!token) return;
+ useEffect(() => {
+  if (!token) return;
 
-    const fetchPersona = async () => {
-      try {
-        setLoadingPersona(true);
+  const fetchPersona = async () => {
+    try {
+      setLoadingPersona(true);
 
-        const response = await fetch(`${API_URL}/persona`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const response = await fetch(`${API_URL}/persona`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        const data = await response.json();
+      const data = await response.json();
+      console.log("📚 Persona response:", data);
 
-        console.log("📚 Persona response:", data);
-
-        if (response.status === 401) {
-          handleLogout();
-          return;
-        }
-
-        if (response.ok) {
-          setPersona(data.persona);
-        } else if (response.status !== 404) {
-          setMessage(data.message || "Failed to load persona.");
-        }
-      } catch (error) {
-        console.error("Get Persona Error:", error);
-
-        setMessage(
-          "Unable to connect to server. Please try again."
-        );
-      } finally {
-        setLoadingPersona(false);
+      if (response.status === 401) {
+        handleLogout();
+        return;
       }
-    };
 
-    fetchPersona();
-  }, [token, handleLogout]);
+      if (response.ok && data.persona) {
+        // 🔻 YE DO LINES ENSURE KARENGE KI UI CHANGE HO JAYE 🔻
+        setPersona(data.persona);
+        setIsEditing(false); 
+      } else if (response.status !== 404) {
+        setMessage(data.message || "Failed to load persona.");
+      }
+    } catch (error) {
+      console.error("Get Persona Error:", error);
+      setMessage("Unable to connect to server. Please try again.");
+    } finally {
+      setLoadingPersona(false);
+    }
+  };
+
+  fetchPersona();
+}, [token, handleLogout]);
 
   // ==========================================
   // HANDLE INPUT
