@@ -169,13 +169,13 @@ function Dashboard() {
 
     try {
       const requestBody = {
-        name: formData.name.trim(),
+        name: form.name.trim(),
 
         relationship:
-          formData.relationship.trim(),
+          form.relationship.trim(),
 
         personality:
-          formData.personality.trim(),
+          form.personality.trim(),
 
         memories: formData.memories
           .split(",")
@@ -183,9 +183,9 @@ function Dashboard() {
           .filter(Boolean),
 
         speakingStyle:
-          formData.speakingStyle.trim(),
+          form.speakingStyle.trim(),
 
-        language: formData.language,
+        language: form.language,
       };
 
       const response = await fetch(
