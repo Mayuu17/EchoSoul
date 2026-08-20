@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://echosoul-q61j.onrender.com/api/persona";
+const API_URL = "http://localhost:5000/api/persona";
+
+const MAX_VOICE_FILE_SIZE = 10 * 1024 * 1024;
 
 // ============================================================
 // PERSONA FORM
-// IMPORTANT: This component is OUTSIDE Dashboard.
-// This prevents input focus from being lost on every keystroke.
 // ============================================================
 
 function PersonaForm({
@@ -25,11 +25,12 @@ function PersonaForm({
   handleVoiceUpload,
   removeVoiceFile,
 }) {
+  const voiceAvailable =
+    Boolean(persona?.voiceSample?.available) ||
+    Boolean(persona?.voiceSample?.url);
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mt-8 space-y-6"
-    >
+    <form onSubmit={handleSubmit} className="mt-8 space-y-6">
       {/* ======================================================
           NAME
       ====================================================== */}
@@ -153,12 +154,11 @@ function PersonaForm({
       </div>
 
       {/* ======================================================
-          VOICE SAMPLE - ONLY EDIT MODE
+          VOICE SAMPLE
       ====================================================== */}
 
       {editMode && (
         <div className="bg-slate-950 border border-cyan-500/20 rounded-2xl p-5 sm:p-6">
-
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 shrink-0 rounded-full bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-2xl">
               🎤
@@ -175,43 +175,74 @@ function PersonaForm({
             </div>
           </div>
 
-          {/* Existing Voice */}
+          {/* ====================================================
+              EXISTING VOICE
+          ==================================================== */}
 
-          {persona?.voiceSample?.url && (
-            <div className="mt-5 bg-slate-900 border border-green-500/20 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
+          {voiceAvailable && (
+            <div className="mt-5 bg-green-500/5 border border-green-500/20 rounded-xl p-4">
+              <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
 
                 <span className="text-sm text-green-400 font-medium">
-                  Voice sample uploaded
+                  Voice clone is available
                 </span>
               </div>
 
-              <audio
-                controls
-                src={persona.voiceSample.url}
-                className="w-full"
-              />
+              {persona?.voiceSample?.url && (
+                <audio
+                  controls
+                  src={persona.voiceSample.url}
+                  className="w-full mt-3"
+                />
+              )}
             </div>
           )}
 
-          {/* File Input */}
+          {/* ====================================================
+              PLAN INFORMATION
+          ==================================================== */}
+
+          <div className="mt-5 bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">ℹ️</span>
+
+              <div>
+                <p className="text-sm font-medium text-amber-400">
+                  Instant voice cloning requires ElevenLabs support
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1 leading-5">
+                  Your EchoSoul backend is connected correctly. If ElevenLabs
+                  says your subscription does not include instant voice
+                  cloning, voice cloning cannot be completed until your
+                  ElevenLabs plan supports this feature.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ====================================================
+              FILE INPUT
+          ==================================================== */}
 
           <div className="mt-5">
             <label
               htmlFor="voice-upload"
               className="block border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-6 text-center cursor-pointer transition"
             >
-              <div className="text-3xl">
-                🎧
-              </div>
+              <div className="text-3xl">🎧</div>
 
               <p className="text-gray-300 mt-2">
                 Choose an audio file
               </p>
 
               <p className="text-gray-600 text-xs mt-1">
-                MP3, WAV, M4A and other audio formats • Max 50 MB
+                OGG, MP3, WAV, M4A and other audio formats
+              </p>
+
+              <p className="text-gray-600 text-xs mt-1">
+                Maximum size: 10 MB
               </p>
 
               <input
@@ -224,7 +255,9 @@ function PersonaForm({
             </label>
           </div>
 
-          {/* Selected File */}
+          {/* ====================================================
+              SELECTED FILE
+          ==================================================== */}
 
           {voiceFile && (
             <div className="mt-4 bg-slate-900 rounded-xl p-4">
@@ -236,6 +269,10 @@ function PersonaForm({
 
                   <p className="text-xs text-gray-500 mt-1">
                     {(voiceFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+
+                  <p className="text-xs text-gray-600 mt-1">
+                    Format: {voiceFile.type || "Unknown"}
                   </p>
                 </div>
 
@@ -250,13 +287,17 @@ function PersonaForm({
             </div>
           )}
 
-          {/* Voice Message */}
+          {/* ====================================================
+              VOICE MESSAGE
+          ==================================================== */}
 
           {voiceMessage && (
             <div
               className={`mt-4 rounded-xl px-4 py-3 text-sm ${
                 voiceMessage.includes("successfully")
                   ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                  : voiceMessage.includes("upgrade")
+                  ? "bg-amber-500/10 border border-amber-500/20 text-amber-400"
                   : "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400"
               }`}
             >
@@ -264,7 +305,9 @@ function PersonaForm({
             </div>
           )}
 
-          {/* Upload Button */}
+          {/* ====================================================
+              UPLOAD BUTTON
+          ==================================================== */}
 
           <button
             type="button"
@@ -274,7 +317,7 @@ function PersonaForm({
           >
             {voiceUploading
               ? "Uploading Voice... ⏳"
-              : persona?.voiceSample?.url
+              : voiceAvailable
               ? "Replace Voice 🎤"
               : "Upload Voice 🎤"}
           </button>
@@ -296,7 +339,6 @@ function PersonaForm({
       ====================================================== */}
 
       <div className="flex flex-col sm:flex-row gap-3">
-
         <button
           type="submit"
           disabled={loading}
@@ -323,7 +365,6 @@ function PersonaForm({
     </form>
   );
 }
-
 
 // ============================================================
 // DASHBOARD
@@ -419,9 +460,7 @@ function Dashboard() {
       } catch (error) {
         console.error("Get Persona Error:", error);
 
-        setMessage(
-          "Unable to connect to server. Please try again."
-        );
+        setMessage("Unable to connect to server. Please try again.");
       } finally {
         setLoadingPersona(false);
       }
@@ -493,9 +532,7 @@ function Dashboard() {
     try {
       const requestBody = {
         name: formData.name.trim(),
-
         relationship: formData.relationship.trim(),
-
         personality: formData.personality.trim(),
 
         memories: formData.memories
@@ -504,7 +541,6 @@ function Dashboard() {
           .filter(Boolean),
 
         speakingStyle: formData.speakingStyle.trim(),
-
         language: formData.language,
       };
 
@@ -527,9 +563,7 @@ function Dashboard() {
       }
 
       if (!response.ok) {
-        setMessage(
-          data.message || "Failed to create persona."
-        );
+        setMessage(data.message || "Failed to create persona.");
         return;
       }
 
@@ -537,15 +571,11 @@ function Dashboard() {
 
       resetForm();
 
-      setMessage(
-        "Persona created successfully! 🎉"
-      );
+      setMessage("Persona created successfully! 🎉");
     } catch (error) {
       console.error("CREATE PERSONA ERROR:", error);
 
-      setMessage(
-        "Unable to connect to server. Please try again."
-      );
+      setMessage("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -558,9 +588,7 @@ function Dashboard() {
   function startEditing() {
     setFormData({
       name: persona?.name || "",
-
       relationship: persona?.relationship || "",
-
       personality: persona?.personality || "",
 
       memories: persona?.memories
@@ -568,7 +596,6 @@ function Dashboard() {
         : "",
 
       speakingStyle: persona?.speakingStyle || "",
-
       language: persona?.language || "English",
     });
 
@@ -656,23 +683,17 @@ function Dashboard() {
       }
 
       if (!response.ok) {
-        setMessage(
-          data.message || "Failed to update persona."
-        );
+        setMessage(data.message || "Failed to update persona.");
         return;
       }
 
       setPersona(data.persona);
 
-      setMessage(
-        "Persona updated successfully! 🎉"
-      );
+      setMessage("Persona updated successfully! 🎉");
     } catch (error) {
       console.error("UPDATE PERSONA ERROR:", error);
 
-      setMessage(
-        "Unable to connect to server. Please try again."
-      );
+      setMessage("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -692,25 +713,27 @@ function Dashboard() {
       return;
     }
 
+    // Audio check
     if (!file.type.startsWith("audio/")) {
       setVoiceFile(null);
 
-      setVoiceMessage(
-        "Please select an audio file only."
-      );
+      setVoiceMessage("Please select an audio file only.");
 
       e.target.value = "";
+
       return;
     }
 
-    if (file.size > 50 * 1024 * 1024) {
+    // Backend limit = 10 MB
+    if (file.size > MAX_VOICE_FILE_SIZE) {
       setVoiceFile(null);
 
       setVoiceMessage(
-        "Voice file must be smaller than 50 MB."
+        "Voice file must be 10 MB or smaller."
       );
 
       e.target.value = "";
+
       return;
     }
 
@@ -727,6 +750,7 @@ function Dashboard() {
 
   function removeVoiceFile() {
     setVoiceFile(null);
+
     setVoiceMessage("");
 
     const fileInput =
@@ -743,9 +767,12 @@ function Dashboard() {
 
   async function handleVoiceUpload() {
     if (!voiceFile) {
-      setVoiceMessage(
-        "Please select a voice file first."
-      );
+      setVoiceMessage("Please select a voice file first.");
+      return;
+    }
+
+    if (!token) {
+      setVoiceMessage("Please login again.");
       return;
     }
 
@@ -762,47 +789,90 @@ function Dashboard() {
       console.log("Size:", voiceFile.size);
       console.log("Type:", voiceFile.type);
 
-      const response = await fetch(
-        `${API_URL}/voice`,
-        {
-          method: "POST",
+      const response = await fetch(`${API_URL}/voice`, {
+        method: "POST",
 
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
 
-          body: voiceFormData,
-        }
-      );
+        body: voiceFormData,
+      });
 
-      const data = await response.json();
+      let data = {};
 
-      console.log(
-        "🎤 Voice upload response:",
-        data
-      );
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      console.log("🎤 Voice upload response:", data);
+
+      // ======================================================
+      // AUTH ERROR
+      // ======================================================
 
       if (response.status === 401) {
         handleLogout();
         return;
       }
 
+      // ======================================================
+      // ELEVENLABS PLAN LIMITATION
+      // ======================================================
+
+      const serverMessage =
+        data?.message || "";
+
+      if (
+        serverMessage
+          .toLowerCase()
+          .includes("subscription") ||
+        serverMessage
+          .toLowerCase()
+          .includes("instant voice cloning") ||
+        serverMessage
+          .toLowerCase()
+          .includes("upgrade") ||
+        serverMessage
+          .toLowerCase()
+          .includes("create_instant_voice_clone")
+      ) {
+        setVoiceMessage(
+          "⚠️ Your ElevenLabs subscription does not include Instant Voice Cloning. Please upgrade your ElevenLabs plan to enable voice cloning."
+        );
+
+        return;
+      }
+
+      // ======================================================
+      // NORMAL SERVER ERROR
+      // ======================================================
+
       if (!response.ok) {
         throw new Error(
-          data.message || "Voice upload failed."
+          serverMessage || "Voice upload failed."
         );
       }
+
+      // ======================================================
+      // SUCCESS
+      // ======================================================
 
       setPersona((prev) => ({
         ...prev,
 
-        voiceSample: data.voiceSample,
+        voiceSample: data.voiceSample || {
+          available: true,
+          uploadedAt: new Date().toISOString(),
+        },
       }));
 
       setVoiceFile(null);
 
       setVoiceMessage(
-        "Voice sample uploaded successfully! 🎉"
+        "Voice sample uploaded and cloned successfully! 🎉"
       );
 
       const fileInput =
@@ -812,13 +882,34 @@ function Dashboard() {
         fileInput.value = "";
       }
     } catch (error) {
-      console.error(
-        "VOICE UPLOAD ERROR:",
-        error
-      );
+      console.error("VOICE UPLOAD ERROR:", error);
+
+      const errorMessage =
+        error?.message || "";
+
+      if (
+        errorMessage
+          .toLowerCase()
+          .includes("subscription") ||
+        errorMessage
+          .toLowerCase()
+          .includes("instant voice cloning") ||
+        errorMessage
+          .toLowerCase()
+          .includes("upgrade") ||
+        errorMessage
+          .toLowerCase()
+          .includes("create_instant_voice_clone")
+      ) {
+        setVoiceMessage(
+          "⚠️ Your ElevenLabs subscription does not include Instant Voice Cloning. Please upgrade your ElevenLabs plan to enable voice cloning."
+        );
+
+        return;
+      }
 
       setVoiceMessage(
-        error.message ||
+        errorMessage ||
           "Voice upload failed. Please try again."
       );
     } finally {
@@ -853,6 +944,10 @@ function Dashboard() {
   // ============================================================
   // DASHBOARD
   // ============================================================
+
+  const voiceAvailable =
+    Boolean(persona?.voiceSample?.available) ||
+    Boolean(persona?.voiceSample?.url);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -995,9 +1090,15 @@ function Dashboard() {
               Voice
             </h3>
 
-            <p className="text-gray-400 text-sm mt-2">
-              {persona?.voiceSample?.url
-                ? "Voice sample ready ✓"
+            <p
+              className={`text-sm mt-2 ${
+                voiceAvailable
+                  ? "text-green-400"
+                  : "text-gray-400"
+              }`}
+            >
+              {voiceAvailable
+                ? "Voice clone ready ✓"
                 : "Voice sample not added"}
             </p>
           </div>
@@ -1047,7 +1148,9 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Persona Details */}
+            {/* =================================================
+                PERSONA DETAILS
+            ================================================= */}
 
             <div className="p-5 sm:p-8 grid md:grid-cols-2 gap-5 sm:gap-6">
 
@@ -1089,17 +1192,19 @@ function Dashboard() {
                   🎙️ Voice
                 </h3>
 
-                {persona.voiceSample?.url ? (
+                {voiceAvailable ? (
                   <div className="mt-3">
                     <p className="text-green-400 mb-3">
-                      Voice sample saved ✓
+                      Voice clone available ✓
                     </p>
 
-                    <audio
-                      controls
-                      src={persona.voiceSample.url}
-                      className="w-full"
-                    />
+                    {persona.voiceSample?.url && (
+                      <audio
+                        controls
+                        src={persona.voiceSample.url}
+                        className="w-full"
+                      />
+                    )}
                   </div>
                 ) : (
                   <p className="text-gray-500 mt-3">
@@ -1109,7 +1214,9 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Memories */}
+            {/* =================================================
+                MEMORIES
+            ================================================= */}
 
             <div className="px-5 sm:px-8 pb-8">
 
@@ -1151,7 +1258,9 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Edit Button */}
+            {/* =================================================
+                EDIT BUTTON
+            ================================================= */}
 
             <div className="px-5 sm:px-8 pb-8">
               <button
@@ -1177,7 +1286,8 @@ function Dashboard() {
               </h2>
 
               <p className="text-gray-400 mt-3 leading-7">
-                Tell EchoSoul about the person whose personality and memories you want to preserve.
+                Tell EchoSoul about the person whose personality and
+                memories you want to preserve.
               </p>
             </div>
 

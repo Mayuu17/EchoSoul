@@ -58,8 +58,7 @@ const ALLOWED_AUDIO_TYPES = [
 // MAX VOICE FILE SIZE
 // ==========================================
 
-const MAX_VOICE_FILE_SIZE =
-  10 * 1024 * 1024;
+const MAX_VOICE_FILE_SIZE = 10 * 1024 * 1024;
 
 // ==========================================
 // CLEAN ARRAY HELPER
@@ -133,10 +132,9 @@ const createPersona = async (req, res) => {
     // CHECK EXISTING PERSONA
     // ========================================
 
-    const existingPersona =
-      await Persona.findOne({
-        user: req.user.userId,
-      });
+    const existingPersona = await Persona.findOne({
+      user: req.user.userId,
+    });
 
     if (existingPersona) {
       return res.status(400).json({
@@ -149,34 +147,31 @@ const createPersona = async (req, res) => {
     // CREATE PERSONA
     // ========================================
 
-    const persona =
-      await Persona.create({
-        user: req.user.userId,
+    const persona = await Persona.create({
+      user: req.user.userId,
 
-        name: name.trim(),
+      name: name.trim(),
 
-        relationship:
-          relationship.trim(),
+      relationship: relationship.trim(),
 
-        personality:
-          typeof personality === "string"
-            ? personality.trim()
-            : "",
+      personality:
+        typeof personality === "string"
+          ? personality.trim()
+          : "",
 
-        memories:
-          cleanMemories(memories),
+      memories: cleanMemories(memories),
 
-        speakingStyle:
-          typeof speakingStyle === "string"
-            ? speakingStyle.trim()
-            : "",
+      speakingStyle:
+        typeof speakingStyle === "string"
+          ? speakingStyle.trim()
+          : "",
 
-        language:
-          typeof language === "string" &&
-          language.trim()
-            ? language.trim()
-            : "English",
-      });
+      language:
+        typeof language === "string" &&
+        language.trim()
+          ? language.trim()
+          : "English",
+    });
 
     console.log(
       "===================================="
@@ -250,10 +245,9 @@ const updatePersona = async (req, res) => {
     // FIND ONLY CURRENT USER'S PERSONA
     // ========================================
 
-    const persona =
-      await Persona.findOne({
-        user: req.user.userId,
-      });
+    const persona = await Persona.findOne({
+      user: req.user.userId,
+    });
 
     if (!persona) {
       return res.status(404).json({
@@ -392,9 +386,6 @@ const updatePersona = async (req, res) => {
 // ==========================================
 //
 // PRIVACY:
-// The uploaded audio is NOT uploaded to Cloudinary.
-//
-// Flow:
 //
 // Browser
 //    ↓
@@ -408,12 +399,10 @@ const updatePersona = async (req, res) => {
 //    ↓
 // Temporary audio buffer released
 //
+// Original audio is NOT stored on Cloudinary.
 // ==========================================
 
-const uploadVoiceSample = async (
-  req,
-  res
-) => {
+const uploadVoiceSample = async (req, res) => {
   try {
     console.log(
       "\n===================================="
@@ -443,8 +432,9 @@ const uploadVoiceSample = async (
     // ========================================
 
     if (!elevenlabs) {
-      return res.status(500).json({
+      return res.status(503).json({
         success: false,
+        code: "ELEVENLABS_NOT_CONFIGURED",
         message:
           "Voice cloning service is not configured.",
       });
@@ -457,8 +447,9 @@ const uploadVoiceSample = async (
     if (!req.file) {
       return res.status(400).json({
         success: false,
+        code: "VOICE_FILE_REQUIRED",
         message:
-          "Voice sample is required",
+          "Voice sample is required.",
       });
     }
 
@@ -473,6 +464,7 @@ const uploadVoiceSample = async (
     ) {
       return res.status(400).json({
         success: false,
+        code: "INVALID_VOICE_FILE",
         message:
           "Invalid voice sample.",
       });
@@ -482,10 +474,11 @@ const uploadVoiceSample = async (
     // MIME TYPE CHECK
     // ========================================
 
-    const mimeType =
-      String(req.file.mimetype || "")
-        .toLowerCase()
-        .trim();
+    const mimeType = String(
+      req.file.mimetype || ""
+    )
+      .toLowerCase()
+      .trim();
 
     if (
       !ALLOWED_AUDIO_TYPES.includes(
@@ -494,8 +487,9 @@ const uploadVoiceSample = async (
     ) {
       return res.status(400).json({
         success: false,
+        code: "UNSUPPORTED_AUDIO_FORMAT",
         message:
-          "Unsupported audio format.",
+          "Unsupported audio format. Please use OGG, MP3, WAV, M4A or another supported audio format.",
       });
     }
 
@@ -509,6 +503,7 @@ const uploadVoiceSample = async (
     ) {
       return res.status(400).json({
         success: false,
+        code: "VOICE_FILE_TOO_LARGE",
         message:
           "Voice file must be 10 MB or smaller.",
       });
@@ -529,27 +524,20 @@ const uploadVoiceSample = async (
       "bytes"
     );
 
-    // IMPORTANT:
-    // Do NOT log:
-    // - audio buffer
-    // - Cloudinary URL
-    // - voice recording contents
-    // - sensitive metadata
-
     // ========================================
     // FIND CURRENT USER'S PERSONA
     // ========================================
 
-    const persona =
-      await Persona.findOne({
-        user: req.user.userId,
-      });
+    const persona = await Persona.findOne({
+      user: req.user.userId,
+    });
 
     if (!persona) {
       return res.status(404).json({
         success: false,
+        code: "PERSONA_NOT_FOUND",
         message:
-          "Persona not found",
+          "Persona not found.",
       });
     }
 
@@ -596,36 +584,22 @@ const uploadVoiceSample = async (
     }
 
     // ========================================
-    // SAVE ONLY REQUIRED VOICE INFORMATION
+    // SAVE VOICE INFORMATION
     // ========================================
-    //
-    // IMPORTANT:
-    // We do NOT save the original audio URL.
-    //
-    // The voice ID is only stored server-side
-    // and should not be exposed unnecessarily
-    // to the frontend.
-    //
 
     persona.voiceSample = {
       url: "",
 
       voiceId: voiceId.trim(),
 
-      uploadedAt:
-        new Date(),
+      uploadedAt: new Date(),
     };
 
     await persona.save();
 
     // ========================================
-    // REMOVE LOCAL REFERENCES
+    // SUCCESS LOG
     // ========================================
-    //
-    // We do not write the audio to disk.
-    // The request's memory buffer will be released
-    // after request processing completes.
-    //
 
     console.log(
       "===================================="
@@ -655,16 +629,12 @@ const uploadVoiceSample = async (
     // ========================================
     // SAFE RESPONSE
     // ========================================
-    //
-    // Do NOT send the ElevenLabs voice ID
-    // or original audio URL to the browser.
-    //
 
     return res.status(200).json({
       success: true,
 
       message:
-        "Voice uploaded and cloned successfully",
+        "Voice uploaded and cloned successfully.",
 
       voiceSample: {
         uploadedAt:
@@ -684,32 +654,157 @@ const uploadVoiceSample = async (
 
     console.error(
       "Message:",
-      error.message || error
+      error?.message || error
     );
 
-    if (error.status) {
+    if (error?.status) {
       console.error(
         "Status:",
         error.status
       );
     }
 
-    if (error.code) {
+    if (error?.code) {
       console.error(
         "Code:",
         error.code
       );
     }
 
+    // ========================================
+    // EXTRACT ELEVENLABS ERROR MESSAGE
+    // ========================================
+
+    const rawMessage =
+      error?.body?.detail?.message ||
+      error?.body?.detail ||
+      error?.message ||
+      "";
+
+    const message =
+      typeof rawMessage === "string"
+        ? rawMessage
+        : JSON.stringify(rawMessage);
+
     console.error(
-      "====================================\n"
+      "ElevenLabs message:",
+      message
     );
+
+    // ========================================
+    // PLAN / PERMISSION ERROR
+    // ========================================
+
+    const lowerMessage =
+      message.toLowerCase();
+
+    const isVoiceClonePlanError =
+      lowerMessage.includes(
+        "instant voice cloning"
+      ) ||
+      lowerMessage.includes(
+        "create_instant_voice_clone"
+      ) ||
+      lowerMessage.includes(
+        "subscription does not include"
+      ) ||
+      lowerMessage.includes(
+        "permission"
+      );
+
+    if (isVoiceClonePlanError) {
+      console.error(
+        "⚠️ ElevenLabs Instant Voice Cloning is not available on the current subscription."
+      );
+
+      return res.status(402).json({
+        success: false,
+
+        code:
+          "INSTANT_VOICE_CLONING_UNAVAILABLE",
+
+        message:
+          "Your ElevenLabs subscription does not include Instant Voice Cloning. Please upgrade your ElevenLabs plan to enable voice cloning.",
+      });
+    }
+
+    // ========================================
+    // ELEVENLABS RATE LIMIT
+    // ========================================
+
+    if (
+      error?.status === 429 ||
+      lowerMessage.includes(
+        "rate limit"
+      )
+    ) {
+      return res.status(429).json({
+        success: false,
+
+        code:
+          "ELEVENLABS_RATE_LIMIT",
+
+        message:
+          "Voice cloning is temporarily unavailable because the ElevenLabs rate limit was reached. Please try again later.",
+      });
+    }
+
+    // ========================================
+    // ELEVENLABS AUTH ERROR
+    // ========================================
+
+    if (
+      error?.status === 401 ||
+      lowerMessage.includes(
+        "invalid api key"
+      ) ||
+      lowerMessage.includes(
+        "unauthorized"
+      )
+    ) {
+      return res.status(502).json({
+        success: false,
+
+        code:
+          "ELEVENLABS_AUTH_ERROR",
+
+        message:
+          "EchoSoul could not authenticate with ElevenLabs. Please check the ElevenLabs API key.",
+      });
+    }
+
+    // ========================================
+    // ELEVENLABS GENERAL ERROR
+    // ========================================
+
+    if (
+      error?.status &&
+      error.status >= 400 &&
+      error.status < 500
+    ) {
+      return res.status(502).json({
+        success: false,
+
+        code:
+          "ELEVENLABS_REQUEST_ERROR",
+
+        message:
+          "ElevenLabs could not process the voice cloning request.",
+      });
+    }
+
+    // ========================================
+    // INTERNAL SERVER ERROR
+    // ========================================
 
     return res.status(500).json({
       success: false,
 
+      code:
+        "VOICE_CLONE_SERVER_ERROR",
+
       message:
-        "Voice upload and cloning failed.",
+        "Voice upload and cloning failed. Please try again.",
     });
   }
 };
@@ -721,13 +816,9 @@ const uploadVoiceSample = async (
 // IMPORTANT:
 // Never expose the ElevenLabs voiceId
 // to the frontend unless absolutely required.
-//
 // ==========================================
 
-const getPersona = async (
-  req,
-  res
-) => {
+const getPersona = async (req, res) => {
   try {
     // ========================================
     // AUTH CHECK
@@ -744,10 +835,9 @@ const getPersona = async (
     // FIND CURRENT USER'S PERSONA
     // ========================================
 
-    const persona =
-      await Persona.findOne({
-        user: req.user.userId,
-      }).lean();
+    const persona = await Persona.findOne({
+      user: req.user.userId,
+    }).lean();
 
     if (!persona) {
       return res.status(404).json({
