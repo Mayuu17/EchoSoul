@@ -1,7 +1,333 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://echosoul-q61j.onrender.com/api";
+const API_URL = "https://echosoul-q61j.onrender.com/api/persona";
+
+// ============================================================
+// PERSONA FORM
+// IMPORTANT: This component is OUTSIDE Dashboard.
+// This prevents input focus from being lost on every keystroke.
+// ============================================================
+
+function PersonaForm({
+  editMode = false,
+  formData,
+  handleChange,
+  handleSubmit,
+  loading,
+  message,
+  cancelEditing,
+  persona,
+  voiceFile,
+  voiceMessage,
+  voiceUploading,
+  handleVoiceChange,
+  handleVoiceUpload,
+  removeVoiceFile,
+}) {
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="mt-8 space-y-6"
+    >
+      {/* ======================================================
+          NAME
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Person's Name
+        </label>
+
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="e.g. Aaji"
+          autoComplete="off"
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition"
+        />
+      </div>
+
+      {/* ======================================================
+          RELATIONSHIP
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Relationship
+        </label>
+
+        <input
+          type="text"
+          name="relationship"
+          value={formData.relationship}
+          onChange={handleChange}
+          placeholder="e.g. Grandmother"
+          autoComplete="off"
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition"
+        />
+      </div>
+
+      {/* ======================================================
+          PERSONALITY
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Personality
+        </label>
+
+        <textarea
+          name="personality"
+          value={formData.personality}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Warm, caring, funny, emotional..."
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition resize-none"
+        />
+      </div>
+
+      {/* ======================================================
+          MEMORIES
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Memories
+        </label>
+
+        <textarea
+          name="memories"
+          value={formData.memories}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Sunday breakfast, childhood stories, family trips..."
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition resize-none"
+        />
+
+        <p className="text-xs text-gray-500 mt-2">
+          Separate multiple memories using commas.
+        </p>
+      </div>
+
+      {/* ======================================================
+          SPEAKING STYLE
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Speaking Style
+        </label>
+
+        <textarea
+          name="speakingStyle"
+          value={formData.speakingStyle}
+          onChange={handleChange}
+          rows={3}
+          placeholder="Caring, uses Marathi words, calls me Sonya..."
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition resize-none"
+        />
+      </div>
+
+      {/* ======================================================
+          LANGUAGE
+      ====================================================== */}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Language
+        </label>
+
+        <select
+          name="language"
+          value={formData.language}
+          onChange={handleChange}
+          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition"
+        >
+          <option value="English">English</option>
+          <option value="Marathi">Marathi</option>
+          <option value="Hindi">Hindi</option>
+        </select>
+      </div>
+
+      {/* ======================================================
+          VOICE SAMPLE - ONLY EDIT MODE
+      ====================================================== */}
+
+      {editMode && (
+        <div className="bg-slate-950 border border-cyan-500/20 rounded-2xl p-5 sm:p-6">
+
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 shrink-0 rounded-full bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-2xl">
+              🎤
+            </div>
+
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-white">
+                Voice Sample
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Upload a short audio sample to personalize your companion.
+              </p>
+            </div>
+          </div>
+
+          {/* Existing Voice */}
+
+          {persona?.voiceSample?.url && (
+            <div className="mt-5 bg-slate-900 border border-green-500/20 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-green-400">✓</span>
+
+                <span className="text-sm text-green-400 font-medium">
+                  Voice sample uploaded
+                </span>
+              </div>
+
+              <audio
+                controls
+                src={persona.voiceSample.url}
+                className="w-full"
+              />
+            </div>
+          )}
+
+          {/* File Input */}
+
+          <div className="mt-5">
+            <label
+              htmlFor="voice-upload"
+              className="block border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-6 text-center cursor-pointer transition"
+            >
+              <div className="text-3xl">
+                🎧
+              </div>
+
+              <p className="text-gray-300 mt-2">
+                Choose an audio file
+              </p>
+
+              <p className="text-gray-600 text-xs mt-1">
+                MP3, WAV, M4A and other audio formats • Max 50 MB
+              </p>
+
+              <input
+                id="voice-upload"
+                type="file"
+                accept="audio/*"
+                onChange={handleVoiceChange}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Selected File */}
+
+          {voiceFile && (
+            <div className="mt-4 bg-slate-900 rounded-xl p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-white truncate">
+                    🎵 {voiceFile.name}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    {(voiceFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={removeVoiceFile}
+                  className="text-gray-500 hover:text-red-400 transition"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Voice Message */}
+
+          {voiceMessage && (
+            <div
+              className={`mt-4 rounded-xl px-4 py-3 text-sm ${
+                voiceMessage.includes("successfully")
+                  ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                  : "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400"
+              }`}
+            >
+              {voiceMessage}
+            </div>
+          )}
+
+          {/* Upload Button */}
+
+          <button
+            type="button"
+            onClick={handleVoiceUpload}
+            disabled={voiceUploading || !voiceFile}
+            className="w-full mt-5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {voiceUploading
+              ? "Uploading Voice... ⏳"
+              : persona?.voiceSample?.url
+              ? "Replace Voice 🎤"
+              : "Upload Voice 🎤"}
+          </button>
+        </div>
+      )}
+
+      {/* ======================================================
+          MESSAGE
+      ====================================================== */}
+
+      {message && (
+        <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl px-4 py-3 text-cyan-400 text-sm">
+          {message}
+        </div>
+      )}
+
+      {/* ======================================================
+          BUTTONS
+      ====================================================== */}
+
+      <div className="flex flex-col sm:flex-row gap-3">
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-3 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading
+            ? "Saving..."
+            : editMode
+            ? "Save Changes 💾"
+            : "Create Persona 🧠"}
+        </button>
+
+        {editMode && (
+          <button
+            type="button"
+            onClick={cancelEditing}
+            disabled={loading}
+            className="sm:px-6 py-3 px-5 border border-slate-700 hover:border-red-400 hover:text-red-400 rounded-xl transition"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+
+// ============================================================
+// DASHBOARD
+// ============================================================
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -26,24 +352,17 @@ function Dashboard() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ============================================================
+  // VOICE STATES
+  // ============================================================
+
   const [voiceFile, setVoiceFile] = useState(null);
   const [voiceUploading, setVoiceUploading] = useState(false);
   const [voiceMessage, setVoiceMessage] = useState("");
 
-  // ==========================================
-  // LOGOUT
-  // ==========================================
-
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    navigate("/login");
-  }, [navigate]);
-
-  // ==========================================
+  // ============================================================
   // CHECK LOGIN
-  // ==========================================
+  // ============================================================
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -65,68 +384,81 @@ function Dashboard() {
     }
   }, [navigate]);
 
-  // ==========================================
+  // ============================================================
   // GET PERSONA
-  // ==========================================
+  // ============================================================
 
- useEffect(() => {
-  if (!token) return;
+  useEffect(() => {
+    if (!token) return;
 
-  const fetchPersona = async () => {
-    try {
-      setLoadingPersona(true);
+    async function fetchPersona() {
+      try {
+        console.log("📚 Loading persona...");
 
-      const response = await fetch(`${API_URL}/persona`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        const response = await fetch(API_URL, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const data = await response.json();
-      console.log("📚 Persona response:", data);
+        const data = await response.json();
 
-      if (response.status === 401) {
-        handleLogout();
-        return;
+        console.log("📚 Persona response:", data);
+
+        if (response.status === 401) {
+          handleLogout();
+          return;
+        }
+
+        if (response.ok) {
+          setPersona(data.persona);
+        } else if (response.status !== 404) {
+          setMessage(data.message || "Failed to load persona.");
+        }
+      } catch (error) {
+        console.error("Get Persona Error:", error);
+
+        setMessage(
+          "Unable to connect to server. Please try again."
+        );
+      } finally {
+        setLoadingPersona(false);
       }
-
-      if (response.ok && data.persona) {
-        // 🔻 YE DO LINES ENSURE KARENGE KI UI CHANGE HO JAYE 🔻
-        setPersona(data.persona);
-        setIsEditing(false); 
-      } else if (response.status !== 404) {
-        setMessage(data.message || "Failed to load persona.");
-      }
-    } catch (error) {
-      console.error("Get Persona Error:", error);
-      setMessage("Unable to connect to server. Please try again.");
-    } finally {
-      setLoadingPersona(false);
     }
-  };
 
-  fetchPersona();
-}, [token, handleLogout]);
+    fetchPersona();
+  }, [token]);
 
-  // ==========================================
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  }
+
+  // ============================================================
   // HANDLE INPUT
-  // ==========================================
+  // ============================================================
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }
 
-  // ==========================================
+  // ============================================================
   // RESET FORM
-  // ==========================================
+  // ============================================================
 
-  const resetForm = () => {
+  function resetForm() {
     setFormData({
       name: "",
       relationship: "",
@@ -135,13 +467,13 @@ function Dashboard() {
       speakingStyle: "",
       language: "English",
     });
-  };
+  }
 
-  // ==========================================
+  // ============================================================
   // CREATE PERSONA
-  // ==========================================
+  // ============================================================
 
-  const handleCreatePersona = async (e) => {
+  async function handleCreatePersona(e) {
     e.preventDefault();
 
     setMessage("");
@@ -161,7 +493,9 @@ function Dashboard() {
     try {
       const requestBody = {
         name: formData.name.trim(),
+
         relationship: formData.relationship.trim(),
+
         personality: formData.personality.trim(),
 
         memories: formData.memories
@@ -170,10 +504,11 @@ function Dashboard() {
           .filter(Boolean),
 
         speakingStyle: formData.speakingStyle.trim(),
+
         language: formData.language,
       };
 
-      const response = await fetch(`${API_URL}/persona`, {
+      const response = await fetch(API_URL, {
         method: "POST",
 
         headers: {
@@ -214,29 +549,27 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // ==========================================
+  // ============================================================
   // START EDITING
-  // ==========================================
+  // ============================================================
 
-  const startEditing = () => {
-    if (!persona) return;
-
+  function startEditing() {
     setFormData({
-      name: persona.name || "",
+      name: persona?.name || "",
 
-      relationship: persona.relationship || "",
+      relationship: persona?.relationship || "",
 
-      personality: persona.personality || "",
+      personality: persona?.personality || "",
 
-      memories: Array.isArray(persona.memories)
+      memories: persona?.memories
         ? persona.memories.join(", ")
         : "",
 
-      speakingStyle: persona.speakingStyle || "",
+      speakingStyle: persona?.speakingStyle || "",
 
-      language: persona.language || "English",
+      language: persona?.language || "English",
     });
 
     setMessage("");
@@ -246,20 +579,18 @@ function Dashboard() {
     setIsEditing(true);
 
     setTimeout(() => {
-      document
-        .getElementById("edit-persona-form")
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-    }, 50);
-  };
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 100);
+  }
 
-  // ==========================================
+  // ============================================================
   // CANCEL EDITING
-  // ==========================================
+  // ============================================================
 
-  const cancelEditing = () => {
+  function cancelEditing() {
     setIsEditing(false);
 
     setMessage("");
@@ -267,13 +598,13 @@ function Dashboard() {
     setVoiceFile(null);
 
     resetForm();
-  };
+  }
 
-  // ==========================================
+  // ============================================================
   // UPDATE PERSONA
-  // ==========================================
+  // ============================================================
 
-  const handleUpdatePersona = async (e) => {
+  async function handleUpdatePersona(e) {
     e.preventDefault();
 
     setMessage("");
@@ -291,24 +622,7 @@ function Dashboard() {
     setLoading(true);
 
     try {
-      const requestBody = {
-        name: formData.name.trim(),
-
-        relationship: formData.relationship.trim(),
-
-        personality: formData.personality.trim(),
-
-        memories: formData.memories
-          .split(",")
-          .map((memory) => memory.trim())
-          .filter(Boolean),
-
-        speakingStyle: formData.speakingStyle.trim(),
-
-        language: formData.language,
-      };
-
-      const response = await fetch(`${API_URL}/persona`, {
+      const response = await fetch(API_URL, {
         method: "PUT",
 
         headers: {
@@ -316,7 +630,22 @@ function Dashboard() {
           Authorization: `Bearer ${token}`,
         },
 
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          name: formData.name.trim(),
+
+          relationship: formData.relationship.trim(),
+
+          personality: formData.personality.trim(),
+
+          memories: formData.memories
+            .split(",")
+            .map((memory) => memory.trim())
+            .filter(Boolean),
+
+          speakingStyle: formData.speakingStyle.trim(),
+
+          language: formData.language,
+        }),
       });
 
       const data = await response.json();
@@ -347,13 +676,13 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // ==========================================
-  // SELECT VOICE
-  // ==========================================
+  // ============================================================
+  // SELECT VOICE FILE
+  // ============================================================
 
-  const handleVoiceChange = (e) => {
+  function handleVoiceChange(e) {
     const file = e.target.files?.[0];
 
     setVoiceMessage("");
@@ -390,13 +719,29 @@ function Dashboard() {
     setVoiceMessage(
       "Voice file selected successfully. 🎤"
     );
-  };
+  }
 
-  // ==========================================
+  // ============================================================
+  // REMOVE VOICE FILE
+  // ============================================================
+
+  function removeVoiceFile() {
+    setVoiceFile(null);
+    setVoiceMessage("");
+
+    const fileInput =
+      document.getElementById("voice-upload");
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  }
+
+  // ============================================================
   // UPLOAD VOICE
-  // ==========================================
+  // ============================================================
 
-  const handleVoiceUpload = async () => {
+  async function handleVoiceUpload() {
     if (!voiceFile) {
       setVoiceMessage(
         "Please select a voice file first."
@@ -408,12 +753,17 @@ function Dashboard() {
     setVoiceMessage("");
 
     try {
-      const uploadData = new FormData();
+      const voiceFormData = new FormData();
 
-      uploadData.append("voice", voiceFile);
+      voiceFormData.append("voice", voiceFile);
+
+      console.log("🎤 Uploading voice...");
+      console.log("File:", voiceFile.name);
+      console.log("Size:", voiceFile.size);
+      console.log("Type:", voiceFile.type);
 
       const response = await fetch(
-        `${API_URL}/persona/voice`,
+        `${API_URL}/voice`,
         {
           method: "POST",
 
@@ -421,7 +771,7 @@ function Dashboard() {
             Authorization: `Bearer ${token}`,
           },
 
-          body: uploadData,
+          body: voiceFormData,
         }
       );
 
@@ -445,6 +795,7 @@ function Dashboard() {
 
       setPersona((prev) => ({
         ...prev,
+
         voiceSample: data.voiceSample,
       }));
 
@@ -473,396 +824,11 @@ function Dashboard() {
     } finally {
       setVoiceUploading(false);
     }
-  };
-
-  // ==========================================
-  // PERSONA FORM
-  // ==========================================
-
-  function PersonaForm({ editMode = false }) {
-    return (
-      <form
-        id={
-          editMode
-            ? "edit-persona-form"
-            : "create-persona-form"
-        }
-        onSubmit={
-          editMode
-            ? handleUpdatePersona
-            : handleCreatePersona
-        }
-        className="mt-8 space-y-6"
-      >
-        {/* NAME */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-name"
-                : "create-name"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Person's Name
-          </label>
-
-          <input
-            id={
-              editMode
-                ? "edit-name"
-                : "create-name"
-            }
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="e.g. Aaji"
-            autoComplete="off"
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition"
-          />
-        </div>
-
-        {/* RELATIONSHIP */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-relationship"
-                : "create-relationship"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Relationship
-          </label>
-
-          <input
-            id={
-              editMode
-                ? "edit-relationship"
-                : "create-relationship"
-            }
-            type="text"
-            name="relationship"
-            value={formData.relationship}
-            onChange={handleChange}
-            placeholder="e.g. Grandmother"
-            autoComplete="off"
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition"
-          />
-        </div>
-
-        {/* PERSONALITY */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-personality"
-                : "create-personality"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Personality
-          </label>
-
-          <textarea
-            id={
-              editMode
-                ? "edit-personality"
-                : "create-personality"
-            }
-            name="personality"
-            value={formData.personality}
-            onChange={handleChange}
-            rows={4}
-            placeholder="Warm, caring, funny, emotional..."
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition resize-none"
-          />
-        </div>
-
-        {/* MEMORIES */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-memories"
-                : "create-memories"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Memories
-          </label>
-
-          <textarea
-            id={
-              editMode
-                ? "edit-memories"
-                : "create-memories"
-            }
-            name="memories"
-            value={formData.memories}
-            onChange={handleChange}
-            rows={4}
-            placeholder="Sunday breakfast, childhood stories, family trips..."
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition resize-none"
-          />
-
-          <p className="text-xs text-gray-500 mt-2">
-            Separate multiple memories using commas.
-          </p>
-        </div>
-
-        {/* SPEAKING STYLE */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-speaking-style"
-                : "create-speaking-style"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Speaking Style
-          </label>
-
-          <textarea
-            id={
-              editMode
-                ? "edit-speaking-style"
-                : "create-speaking-style"
-            }
-            name="speakingStyle"
-            value={formData.speakingStyle}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Caring, uses Marathi words, calls me Sonya..."
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition resize-none"
-          />
-        </div>
-
-        {/* LANGUAGE */}
-
-        <div>
-          <label
-            htmlFor={
-              editMode
-                ? "edit-language"
-                : "create-language"
-            }
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Language
-          </label>
-
-          <select
-            id={
-              editMode
-                ? "edit-language"
-                : "create-language"
-            }
-            name="language"
-            value={formData.language}
-            onChange={handleChange}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10 transition"
-          >
-            <option value="English">
-              English
-            </option>
-
-            <option value="Marathi">
-              Marathi
-            </option>
-
-            <option value="Hindi">
-              Hindi
-            </option>
-          </select>
-        </div>
-
-        {/* VOICE */}
-
-        {editMode && (
-          <div className="bg-slate-950 border border-cyan-500/20 rounded-2xl p-5 sm:p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 shrink-0 rounded-full bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-2xl">
-                🎤
-              </div>
-
-              <div className="min-w-0">
-                <h3 className="text-lg font-semibold">
-                  Voice Sample
-                </h3>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Upload a short audio sample to personalize your companion.
-                </p>
-              </div>
-            </div>
-
-            {persona?.voiceSample?.url && (
-              <div className="mt-5 bg-slate-900 border border-green-500/20 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-green-400">
-                    ✓
-                  </span>
-
-                  <span className="text-sm text-green-400 font-medium">
-                    Voice sample uploaded
-                  </span>
-                </div>
-
-                <audio
-                  controls
-                  src={persona.voiceSample.url}
-                  className="w-full"
-                />
-              </div>
-            )}
-
-            <div className="mt-5">
-              <label
-                htmlFor="voice-upload"
-                className="block border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-6 text-center cursor-pointer transition"
-              >
-                <div className="text-3xl">
-                  🎧
-                </div>
-
-                <p className="text-gray-300 mt-2">
-                  Choose an audio file
-                </p>
-
-                <p className="text-gray-600 text-xs mt-1">
-                  MP3, WAV, M4A and other audio formats • Max 50 MB
-                </p>
-
-                <input
-                  id="voice-upload"
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleVoiceChange}
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            {voiceFile && (
-              <div className="mt-4 bg-slate-900 rounded-xl p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm text-white truncate">
-                      🎵 {voiceFile.name}
-                    </p>
-
-                    <p className="text-xs text-gray-500 mt-1">
-                      {(
-                        voiceFile.size /
-                        (1024 * 1024)
-                      ).toFixed(2)}{" "}
-                      MB
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setVoiceFile(null);
-                      setVoiceMessage("");
-
-                      const fileInput =
-                        document.getElementById(
-                          "voice-upload"
-                        );
-
-                      if (fileInput) {
-                        fileInput.value = "";
-                      }
-                    }}
-                    className="text-gray-500 hover:text-red-400 transition"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {voiceMessage && (
-              <div
-                className={`mt-4 rounded-xl px-4 py-3 text-sm ${
-                  voiceMessage.includes(
-                    "successfully"
-                  )
-                    ? "bg-green-500/10 border border-green-500/20 text-green-400"
-                    : "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400"
-                }`}
-              >
-                {voiceMessage}
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleVoiceUpload}
-              disabled={
-                voiceUploading || !voiceFile
-              }
-              className="w-full mt-5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {voiceUploading
-                ? "Uploading Voice... ⏳"
-                : persona?.voiceSample?.url
-                ? "Replace Voice 🎤"
-                : "Upload Voice 🎤"}
-            </button>
-          </div>
-        )}
-
-        {/* MESSAGE */}
-
-        {message && (
-          <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl px-4 py-3 text-cyan-400 text-sm">
-            {message}
-          </div>
-        )}
-
-        {/* BUTTONS */}
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-3 rounded-xl transition disabled:opacity-50"
-          >
-            {loading
-              ? "Saving... ⏳"
-              : editMode
-              ? "Save Changes 💾"
-              : "Create Persona 🧠"}
-          </button>
-
-          {editMode && (
-            <button
-              type="button"
-              onClick={cancelEditing}
-              disabled={loading}
-              className="sm:px-6 py-3 border border-slate-700 hover:border-red-400 hover:text-red-400 rounded-xl transition"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    );
   }
 
-  // ==========================================
+  // ============================================================
   // LOADING
-  // ==========================================
+  // ============================================================
 
   if (!token || loadingPersona) {
     return (
@@ -884,16 +850,20 @@ function Dashboard() {
     );
   }
 
-  // ==========================================
+  // ============================================================
   // DASHBOARD
-  // ==========================================
+  // ============================================================
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* NAVBAR */}
+
+      {/* ======================================================
+          NAVBAR
+      ====================================================== */}
 
       <nav className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
@@ -903,12 +873,13 @@ function Dashboard() {
           </button>
 
           <div className="flex items-center gap-2 sm:gap-3">
+
             <button
               type="button"
               onClick={() => navigate("/chat")}
-              className="border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 px-3 sm:px-4 py-2 rounded-lg text-sm transition"
+              className="hidden sm:block border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 px-4 py-2 rounded-lg text-sm transition"
             >
-              💬 <span className="hidden sm:inline">Chat</span>
+              💬 Chat
             </button>
 
             <button
@@ -916,16 +887,21 @@ function Dashboard() {
               onClick={handleLogout}
               className="border border-slate-700 hover:border-red-400 hover:text-red-400 px-3 sm:px-4 py-2 rounded-lg text-sm transition"
             >
-              🚪 <span className="hidden sm:inline">Logout</span>
+              Logout 🚪
             </button>
           </div>
         </div>
       </nav>
 
-      {/* MAIN */}
+      {/* ======================================================
+          MAIN
+      ====================================================== */}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        {/* WELCOME */}
+
+        {/* ====================================================
+            WELCOME
+        ==================================================== */}
 
         <div className="mb-8 sm:mb-10">
           <p className="text-cyan-400 font-medium text-sm">
@@ -945,9 +921,12 @@ function Dashboard() {
           </p>
         </div>
 
-        {/* QUICK ACTIONS */}
+        {/* ====================================================
+            QUICK ACTIONS
+        ==================================================== */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8 sm:mb-10">
+
           <button
             type="button"
             onClick={() => navigate("/chat")}
@@ -968,18 +947,14 @@ function Dashboard() {
 
           <button
             type="button"
-            onClick={() => {
-              if (persona) {
-                startEditing();
-              } else {
-                document
-                  .getElementById("create-persona-form")
-                  ?.scrollIntoView({
+            onClick={() =>
+              persona
+                ? startEditing()
+                : window.scrollTo({
+                    top: document.body.scrollHeight,
                     behavior: "smooth",
-                    block: "start",
-                  });
-              }
-            }}
+                  })
+            }
             className="text-left bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 hover:border-cyan-400 hover:-translate-y-1 transition"
           >
             <div className="text-4xl">
@@ -1028,21 +1003,27 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* PERSONA */}
+        {/* ====================================================
+            PERSONA
+        ==================================================== */}
 
         {persona ? (
           <section className="bg-slate-900 border border-cyan-500/20 rounded-3xl overflow-hidden">
-            {/* HEADER */}
+
+            {/* Persona Header */}
 
             <div className="bg-gradient-to-r from-cyan-500/10 to-transparent p-5 sm:p-8 border-b border-slate-800">
+
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+
                 <div className="flex items-center gap-4 sm:gap-5">
+
                   <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-full bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-3xl sm:text-4xl">
                     💙
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-cyan-400 text-sm font-medium">
+                    <p className="text-cyan-400 text-xs sm:text-sm font-medium">
                       YOUR AI COMPANION
                     </p>
 
@@ -1066,15 +1047,16 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* DETAILS */}
+            {/* Persona Details */}
 
-            <div className="p-5 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="p-5 sm:p-8 grid md:grid-cols-2 gap-5 sm:gap-6">
+
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 sm:p-6">
                 <h3 className="text-lg font-semibold">
                   🧠 Personality
                 </h3>
 
-                <p className="text-gray-400 mt-3 leading-7 break-words">
+                <p className="text-gray-400 mt-3 leading-7">
                   {persona.personality ||
                     "Not added yet."}
                 </p>
@@ -1085,7 +1067,7 @@ function Dashboard() {
                   🗣️ Speaking Style
                 </h3>
 
-                <p className="text-gray-400 mt-3 leading-7 break-words">
+                <p className="text-gray-400 mt-3 leading-7">
                   {persona.speakingStyle ||
                     "Not added yet."}
                 </p>
@@ -1115,9 +1097,7 @@ function Dashboard() {
 
                     <audio
                       controls
-                      src={
-                        persona.voiceSample.url
-                      }
+                      src={persona.voiceSample.url}
                       className="w-full"
                     />
                   </div>
@@ -1129,10 +1109,12 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* MEMORIES */}
+            {/* Memories */}
 
-            <div className="px-5 sm:px-8 pb-5 sm:pb-8">
+            <div className="px-5 sm:px-8 pb-8">
+
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 sm:p-6">
+
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-semibold">
                     💭 Memories
@@ -1144,6 +1126,7 @@ function Dashboard() {
                 </div>
 
                 <div className="mt-4 space-y-3">
+
                   {persona.memories?.length > 0 ? (
                     persona.memories.map(
                       (memory, index) => (
@@ -1168,9 +1151,9 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* EDIT BUTTON */}
+            {/* Edit Button */}
 
-            <div className="px-5 sm:px-8 pb-5 sm:pb-8">
+            <div className="px-5 sm:px-8 pb-8">
               <button
                 type="button"
                 onClick={startEditing}
@@ -1182,8 +1165,10 @@ function Dashboard() {
           </section>
         ) : (
           <section className="bg-slate-900 border border-cyan-500/20 rounded-3xl p-5 sm:p-8">
+
             <div className="text-center max-w-2xl mx-auto">
-              <div className="text-5xl sm:text-6xl mb-5">
+
+              <div className="text-6xl mb-5">
                 🧠
               </div>
 
@@ -1197,42 +1182,42 @@ function Dashboard() {
             </div>
 
             <div className="max-w-2xl mx-auto">
+
               <PersonaForm
-  editMode={isEditing}
-  formData={formData}
-  handleChange={handleChange}
-  handleCreatePersona={handleCreatePersona}
-  handleUpdatePersona={handleUpdatePersona}
-  loading={loading}
-  cancelEditing={cancelEditing}
-  persona={persona}
-  voiceFile={voiceFile}
-  handleVoiceChange={handleVoiceChange}
-  handleVoiceUpload={handleVoiceUpload}
-  voiceUploading={voiceUploading}
-  voiceMessage={voiceMessage}
-  setVoiceFile={setVoiceFile}
-  setVoiceMessage={setVoiceMessage}
-  message={message}
-/>
+                editMode={false}
+                formData={formData}
+                handleChange={handleChange}
+                handleSubmit={handleCreatePersona}
+                loading={loading}
+                message={message}
+                persona={persona}
+                voiceFile={voiceFile}
+                voiceMessage={voiceMessage}
+                voiceUploading={voiceUploading}
+                handleVoiceChange={handleVoiceChange}
+                handleVoiceUpload={handleVoiceUpload}
+                removeVoiceFile={removeVoiceFile}
+              />
+
             </div>
           </section>
         )}
 
-        {/* EDIT PERSONA */}
+        {/* ====================================================
+            EDIT PERSONA
+        ==================================================== */}
 
         {persona && isEditing && (
-          <section
-            id="edit-persona-form"
-            className="mt-8 bg-slate-900 border border-cyan-500/30 rounded-3xl p-5 sm:p-8"
-          >
+          <section className="mt-8 bg-slate-900 border border-cyan-500/30 rounded-3xl p-5 sm:p-8">
+
             <div className="flex items-center justify-between gap-4">
+
               <div>
                 <p className="text-cyan-400 text-sm font-medium">
                   PERSONALIZE
                 </p>
 
-                <h2 className="text-2xl font-bold mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold mt-1">
                   Edit Your Persona ✏️
                 </h2>
               </div>
@@ -1247,50 +1232,41 @@ function Dashboard() {
             </div>
 
             <div className="max-w-3xl">
-              <PersonaForm editMode />
+
+              <PersonaForm
+                editMode={true}
+                formData={formData}
+                handleChange={handleChange}
+                handleSubmit={handleUpdatePersona}
+                loading={loading}
+                message={message}
+                cancelEditing={cancelEditing}
+                persona={persona}
+                voiceFile={voiceFile}
+                voiceMessage={voiceMessage}
+                voiceUploading={voiceUploading}
+                handleVoiceChange={handleVoiceChange}
+                handleVoiceUpload={handleVoiceUpload}
+                removeVoiceFile={removeVoiceFile}
+              />
+
             </div>
           </section>
         )}
 
-        {/* FOOTER */}
+        {/* ====================================================
+            FOOTER
+        ==================================================== */}
 
         <div className="text-center mt-12 pb-6">
           <p className="text-gray-600 text-sm">
             EchoSoul • Keeping Memories Alive Through AI 💙
           </p>
         </div>
+
       </main>
     </div>
   );
 }
 
 export default Dashboard;
-
-function PersonaForm({
-  editMode = false,
-  formData,
-  handleChange,
-  handleCreatePersona,
-  handleUpdatePersona,
-  loading,
-  cancelEditing,
-  persona,
-  voiceFile,
-  handleVoiceChange,
-  handleVoiceUpload,
-  voiceUploading,
-  voiceMessage,
-  setVoiceFile,
-  setVoiceMessage,
-  message,
-}) {
-  return (
-    <form
-      id={editMode ? "edit-persona-form" : "create-persona-form"}
-      onSubmit={editMode ? handleUpdatePersona : handleCreatePersona}
-      className="mt-8 space-y-6"
-    >
-      {/* Inputs aur Buttons ka code yahan aayega */}
-    </form>
-  );
-}
