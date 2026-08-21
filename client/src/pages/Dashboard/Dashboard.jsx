@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api/persona";
-
+const API_URL = "https://echosoul-q61j.onrender.com/api/persona";
 const MAX_VOICE_FILE_SIZE = 10 * 1024 * 1024;
 
 // ============================================================
